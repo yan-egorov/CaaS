@@ -4,6 +4,7 @@ import telebot
 import config
 import re
 from telebot import types
+import sqlite3
 
 bot = telebot.TeleBot(config.token)
 
@@ -17,7 +18,19 @@ def send_welcome(message):
 def send_welcome2(message):
     bot.send_message(message.chat.id, 'хой')
 
-sins = ['Обожрался', 'Распустился', 'Алчнулся', 'Опечалился', 'Погневился', 'Приуныл', 'Тщеславнулся', 'Возгордился']
+@bot.message_handler(func=lambda message: message.text=="Перечисли грехи")
+def list_sins(message):
+    # bot.send_message(message.chat.id, 'блин')
+    db_conn = sqlite3.connect('sins.db')
+    c = db_conn.cursor()
+    for row in c.execute('SELECT sin_name FROM sins ORDER BY sin_id'):
+    	bot.send_message(message.chat.id, row)
+    db_conn.close()
+
+# db_conn = sqlite3.connect('sins.db')
+# db_conn.close()
+
+# sins = ['Обожрался', 'Распустился', 'Алчнулся', 'Опечалился', 'Погневился', 'Приуныл', 'Тщеславнулся', 'Возгордился']
 @bot.message_handler(func=lambda message: "греш" in message.text.lower())
 def choose_sin(message):
     # bot.send_message(message.chat.id, 'Расскажи мне, что ты совершил')
@@ -44,4 +57,5 @@ def sin_react(message):
 #     bot.send_message(message.chat.id, message.text)
 
 if __name__ == '__main__':
+    sins = ['Обожрался', 'Распустился', 'Алчнулся', 'Опечалился', 'Погневился', 'Приуныл', 'Тщеславнулся', 'Возгордился']
     bot.polling(none_stop=True)
